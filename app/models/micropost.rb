@@ -1,7 +1,11 @@
 class Micropost < ApplicationRecord
   belongs_to :user
   belongs_to :micropost, optional: true
+
+  has_many :favorites, dependent: :destroy
   default_scope -> { order(created_at: :desc) }
+  scope :favorited_by, -> (user_id) { joins(:favorites).where(favorites: { user: User.find(user_id) }) }
+
   mount_uploader :picture, PictureUploader
   validates :user_id, presence: true
   validates :content, length: { maximum: 140 }

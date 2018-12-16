@@ -8,6 +8,7 @@ class User < ApplicationRecord
                                    dependent:   :destroy
   has_many :following, through: :active_relationships,  source: :followed
   has_many :followers, through: :passive_relationships, source: :follower
+  has_many :favorites, dependent: :destroy
   attr_accessor :remember_token, :activation_token, :reset_token
   before_save   :downcase_email
   before_create :create_activation_digest
@@ -98,6 +99,19 @@ class User < ApplicationRecord
   # Returns true if the current user is following the other user.
   def following?(other_user)
     following.include?(other_user)
+  end
+
+  def favorite(micropost)
+    favorites.find_or_create_by(micropost: micropost)
+  end
+
+  def unfavorite(micropost)
+    favorites.where(micropost: micropost).destroy_all
+    micropost.reload
+  end
+
+  def favorited?(micropost)
+    favorites.find_by(micropost_id: micropost.id).present?
   end
 
   private
